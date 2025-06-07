@@ -1,0 +1,196 @@
+package main
+
+import (
+	"fmt"
+	"strings"
+)
+
+type HewanTernak struct {
+	ID    int
+	Nama  string
+	Jenis string
+	Usia  int
+}
+
+const maxData = 100
+
+var dataTernak [maxData]HewanTernak = [maxData]HewanTernak{
+	{ID: 1, Nama: "Sapi Merah", Jenis: "Sapi", Usia: 4},
+	{ID: 2, Nama: "Kambing Etawa", Jenis: "Kambing", Usia: 2},
+	{ID: 3, Nama: "Ayam Kampung", Jenis: "Ayam", Usia: 1},
+	{ID: 4, Nama: "Domba Garut", Jenis: "Domba", Usia: 3},
+	{ID: 5, Nama: "Bebek Bali", Jenis: "Bebek", Usia: 2},
+}
+
+var jumlahData int = 5
+
+func tambahData(nama, jenis string, usia int) {
+	if jumlahData < maxData {
+		dataTernak[jumlahData] = HewanTernak{ID: jumlahData + 1, Nama: nama, Jenis: jenis, Usia: usia}
+		jumlahData++
+		fmt.Println("Data berhasil ditambahkan.")
+	} else {
+		fmt.Println("Kapasitas data penuh.")
+	}
+}
+
+func tampilkanData() {
+	fmt.Println("\nDaftar Hewan Ternak:")
+	for i := 0; i < jumlahData; i++ {
+		t := dataTernak[i]
+		fmt.Printf("ID: %d | Nama: %s | Jenis: %s | Usia: %d tahun\n", t.ID, t.Nama, t.Jenis, t.Usia)
+	}
+}
+
+func sequentialSearch(jenis string) {
+	fmt.Printf("\nHasil pencarian untuk jenis '%s':\n", jenis)
+	temu := false
+	for i := 0; i < jumlahData; i++ {
+		if strings.ToLower(dataTernak[i].Jenis) == strings.ToLower(jenis) {
+			t := dataTernak[i]
+			fmt.Printf("ID: %d | Nama: %s | Usia: %d tahun\n", t.ID, t.Nama, t.Usia)
+			temu = true
+		}
+	}
+	if !temu {
+		fmt.Println("Data tidak ditemukan.")
+	}
+}
+
+func binarySearch(id int) int {
+	kiri := 0
+	kanan := jumlahData - 1
+	for kiri <= kanan {
+		tengah := (kiri + kanan) / 2
+		if dataTernak[tengah].ID == id {
+			return tengah
+		} else if id < dataTernak[tengah].ID {
+			kanan = tengah - 1
+		} else {
+			kiri = tengah + 1
+		}
+	}
+	return -1
+}
+
+func hapusData(id int) {
+	idx := binarySearch(id)
+	if idx == -1 {
+		fmt.Println("ID tidak ditemukan.")
+	} else {
+		for i := idx; i < jumlahData-1; i++ {
+			dataTernak[i] = dataTernak[i+1]
+		}
+		jumlahData--
+		fmt.Println("Data berhasil dihapus.")
+	}
+}
+
+func editData(id int, nama string, jenis string, usia int) {
+	idx := binarySearch(id)
+	if idx == -1 {
+		fmt.Println("ID tidak ditemukan.")
+	} else {
+		dataTernak[idx].Nama = nama
+		dataTernak[idx].Jenis = jenis
+		dataTernak[idx].Usia = usia
+		fmt.Println("Data berhasil diubah.")
+	}
+}
+
+func selectionSortUsia(asc bool) {
+	for i := 0; i < jumlahData-1; i++ {
+		idx := i
+		for j := i + 1; j < jumlahData; j++ {
+			if (asc && dataTernak[j].Usia < dataTernak[idx].Usia) || (!asc && dataTernak[j].Usia > dataTernak[idx].Usia) {
+				idx = j
+			}
+		}
+		dataTernak[i], dataTernak[idx] = dataTernak[idx], dataTernak[i]
+	}
+}
+
+func insertionSortNama(asc bool) {
+	for i := 1; i < jumlahData; i++ {
+		temp := dataTernak[i]
+		j := i - 1
+		for j >= 0 && ((asc && strings.ToLower(dataTernak[j].Nama) > strings.ToLower(temp.Nama)) || (!asc && strings.ToLower(dataTernak[j].Nama) < strings.ToLower(temp.Nama))) {
+			dataTernak[j+1] = dataTernak[j]
+			j--
+		}
+		dataTernak[j+1] = temp
+	}
+}
+
+func menu() {
+	var pilihan int
+	for pilihan != 9 {
+		fmt.Println("\n=== Menu Peternakan ===")
+		fmt.Println("1. Tambah Hewan")
+		fmt.Println("2. Tampilkan Data")
+		fmt.Println("3. Cari Hewan (Sequential)")
+		fmt.Println("4. Hapus Hewan (Binary)")
+		fmt.Println("5. Edit Hewan")
+		fmt.Println("6. Urutkan Usia (Selection)")
+		fmt.Println("7. Urutkan Nama (Insertion)")
+		fmt.Println("9. Keluar")
+		fmt.Print("Pilih menu: ")
+		fmt.Scanln(&pilihan)
+
+		if pilihan == 1 {
+			var nama, jenis string
+			var usia int
+			fmt.Print("Nama: ")
+			fmt.Scanln(&nama)
+			fmt.Print("Jenis: ")
+			fmt.Scanln(&jenis)
+			fmt.Print("Usia: ")
+			fmt.Scanln(&usia)
+			tambahData(nama, jenis, usia)
+		} else if pilihan == 2 {
+			tampilkanData()
+		} else if pilihan == 3 {
+			var jenis string
+			fmt.Print("Masukkan jenis yang dicari: ")
+			fmt.Scanln(&jenis)
+			sequentialSearch(jenis)
+		} else if pilihan == 4 {
+			var id int
+			fmt.Print("Masukkan ID yang akan dihapus: ")
+			fmt.Scanln(&id)
+			hapusData(id)
+		} else if pilihan == 5 {
+			var id, usia int
+			var nama, jenis string
+			fmt.Print("ID Hewan yang diubah: ")
+			fmt.Scanln(&id)
+			fmt.Print("Nama baru: ")
+			fmt.Scanln(&nama)
+			fmt.Print("Jenis baru: ")
+			fmt.Scanln(&jenis)
+			fmt.Print("Usia baru: ")
+			fmt.Scanln(&usia)
+			editData(id, nama, jenis, usia)
+		} else if pilihan == 6 {
+			var order string
+			fmt.Print("Urutan? (asc/desc): ")
+			fmt.Scanln(&order)
+			selectionSortUsia(strings.ToLower(order) == "asc")
+			tampilkanData()
+		} else if pilihan == 7 {
+			var order string
+			fmt.Print("Urutan? (asc/desc): ")
+			fmt.Scanln(&order)
+			insertionSortNama(strings.ToLower(order) == "asc")
+			tampilkanData()
+		} else if pilihan == 9 {
+			fmt.Println("Keluar dari program.")
+		} else {
+			fmt.Println("Pilihan tidak valid.")
+		}
+	}
+}
+
+func main() {
+	menu()
+}
